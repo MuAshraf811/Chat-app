@@ -1,14 +1,20 @@
+// ignore_for_file: unused_field, unused_local_variable
+
 import 'package:chat/core/widgets/customSpace.dart';
 import 'package:chat/features/User_Home/view/widgets/searchBarAndUpperPart.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../../core/constants.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 
 class Chat extends StatelessWidget {
-  const Chat({
+  Chat({
     super.key,
   });
 
+  final Stream<QuerySnapshot> _collectionStream = FirebaseFirestore.instance
+      .collection('users')
+      .snapshots(includeMetadataChanges: true);
+  
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -22,53 +28,38 @@ class Chat extends StatelessWidget {
           child: const UpperPart(),
         ),
         const CustomSpace(height: 6, width: double.infinity),
-        Expanded(
-          child: ListView.separated(
-            itemBuilder: (context, index) {
-              return Slidable(
-                endActionPane: ActionPane(
-                  motion: const ScrollMotion(),
-                  children: [
-                    SlidableAction(
-                      onPressed: (context) {},
-                      backgroundColor: Colors.red,
-                      icon: Icons.delete,
-                      flex: 1,
-                      padding: const EdgeInsets.all(8),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    SlidableAction(
-                      onPressed: (context) {},
-                      backgroundColor: kAppColor,
-                      icon: Icons.pin,
-                      flex: 1,
-                      padding: const EdgeInsets.all(8),
-                      borderRadius: BorderRadius.circular(16),
-                    )
-                  ],
-                ),
-                child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: kAppColor,
-                    radius: 24,
+        StreamBuilder<QuerySnapshot>(
+          stream: _collectionStream,
+          builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (snapshot.hasError) {
+              return Center(
+                child: Container(
+                  width: 250,
+                  height: 250,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24),
                   ),
-                  title: const Text('Hello this is Title'),
-                  subtitle: const Text('Okay'),
-                  trailing: Text(
-                      '${DateTime.now().year} / ${DateTime.now().month} / ${DateTime.now().day}'),
+                  child: const Text('There is an error'),
                 ),
               );
-            },
-            separatorBuilder: (context, index) {
-              return Divider(
-                endIndent: 32,
-                indent: 32,
-                thickness: 1,
-                color: kAppColor,
+            } else if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(),
               );
-            },
-            itemCount: 10,
-          ),
+            }
+            return Expanded(
+              child: ListView(
+                children: snapshot.data!.docs.map((DocumentSnapshot document) {
+                  Map<String, dynamic> data =
+                      document.data()! as Map<String, dynamic>;
+                  return ListTile(
+                    title: Text(data['firstName']),
+                    subtitle: Text(data['email']),
+                  );
+                }).toList(),
+              ),
+            );
+          },
         ),
       ],
     );

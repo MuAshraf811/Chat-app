@@ -2,9 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:chat/features/register/view/register.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
-import 'package:meta/meta.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 part 'auth_bloc_event.dart';
 part 'auth_bloc_state.dart';
 

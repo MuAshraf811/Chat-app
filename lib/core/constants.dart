@@ -9,7 +9,7 @@ String kLogIn = 'logInPage';
 String kRegister = 'registerPage';
 String kUserHomePage = 'userView';
 Color kAppColor = const Color(0xff2596be);
-List<Widget> kUserPages = const [
+List<Widget> kUserPages =  [
   Chat(),
   Groups(),
   Settings(),
