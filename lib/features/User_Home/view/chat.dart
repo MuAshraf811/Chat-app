@@ -14,7 +14,7 @@ class Chat extends StatelessWidget {
   final Stream<QuerySnapshot> _collectionStream = FirebaseFirestore.instance
       .collection('users')
       .snapshots(includeMetadataChanges: true);
-  
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -31,6 +31,12 @@ class Chat extends StatelessWidget {
         StreamBuilder<QuerySnapshot>(
           stream: _collectionStream,
           builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            final usersList =
+                snapshot.data!.docs.map((DocumentSnapshot document) {
+              Map<String, dynamic> usersinFireStore =
+                  document.data()! as Map<String, dynamic>;
+              return usersinFireStore;
+            }).toList();
             if (snapshot.hasError) {
               return Center(
                 child: Container(
@@ -47,18 +53,25 @@ class Chat extends StatelessWidget {
                 child: CircularProgressIndicator(),
               );
             }
+
             return Expanded(
-              child: ListView(
-                children: snapshot.data!.docs.map((DocumentSnapshot document) {
-                  Map<String, dynamic> data =
-                      document.data()! as Map<String, dynamic>;
-                  return ListTile(
-                    title: Text(data['firstName']),
-                    subtitle: Text(data['email']),
-                  );
-                }).toList(),
-              ),
-            );
+                child: ListView.separated(
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        title: Text(
+                            '${usersList[index]['firstName']} ${usersList[index]['lastName']}'),
+                        subtitle: Text(usersList[index]['email']),
+                      );
+                    },
+                    separatorBuilder: (context, index) {
+                      return Divider(
+                        endIndent: 24,
+                        indent: 24,
+                        color: kAppColor,
+                        thickness: 1.1,
+                      );
+                    },
+                    itemCount: usersList.length));
           },
         ),
       ],
